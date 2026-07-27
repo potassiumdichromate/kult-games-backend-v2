@@ -9,7 +9,6 @@ import {
 import {
   GlobalLeaderboardModel,
   GlobalLeaderboardResponse,
-  GlobalLeaderboardEntryDto,
   GameLeaderboardResponse,
   GameLeaderboardEntryDto,
   LeaderboardEntry,
@@ -27,39 +26,21 @@ export class GlobalLeaderboardService {
 
   async getGlobalLeaderboardPaginated(page: number, pageSize: number): Promise<GlobalLeaderboardResponse> {
     const skip = (page - 1) * pageSize;
-    const globalCount = await this.globalRepo.countAll();
-
-    if (globalCount > 0) {
-      const entries = await this.globalRepo.getGlobalRanking(skip, pageSize);
-      const kultPointsByWallet = await this.kultPointsRepo.getBalancesForWallets(
-        entries.map((e) => e.walletAddress),
-      );
-
-      return {
-        entries: entries.map((e, i) => ({
-          rank: skip + i + 1,
-          walletAddress: e.walletAddress,
-          score: e.score,
-          kultPoints: kultPointsByWallet.get(e.walletAddress.toLowerCase()) ?? 0,
-          level: e.level,
-        })),
-        totalCount: globalCount,
-        page,
-        pageSize,
-        totalPages: globalCount === 0 ? 0 : Math.ceil(globalCount / pageSize),
-      };
-    }
 
     const [kpEntries, totalCount] = await Promise.all([
       this.kultPointsRepo.getPaginated(skip, pageSize),
       this.kultPointsRepo.countAll(),
     ]);
 
+    const gameScoreMap = await this.gameLbService.fetchWeightedScoresForWallets(
+      kpEntries.map((e) => e.walletAddress),
+    );
+
     return {
       entries: kpEntries.map((e, i) => ({
         rank: skip + i + 1,
         walletAddress: e.walletAddress,
-        score: 0,
+        score: gameScoreMap.get(e.walletAddress.toLowerCase()) ?? 0,
         kultPoints: e.kultPoints,
         level: calculateLevel(e.kultPoints),
       })),
@@ -181,16 +162,28 @@ export class GameLeaderboardService {
 
     return result;
   }
-}
 
-function toGlobalEntryDto(model: GlobalLeaderboardModel, kultPoints = 0): GlobalLeaderboardEntryDto {
-  return {
-    rank: model.rank,
-    walletAddress: model.walletAddress,
-    score: model.score,
-    kultPoints,
-    level: model.level,
-  };
+  /** Weighted sum of in-game scores across all configured games, for a specific set of wallets. */
+  async fetchWeightedScoresForWallets(wallets: string[]): Promise<Map<string, number>> {
+    const result = new Map<string, number>();
+    if (!wallets.length) return result;
+
+    const configs = await this.configRepo.findAll();
+
+    for (const cfg of configs) {
+      try {
+        const scores = await this.dataRepo.fetchScoresForWallets(cfg, wallets);
+        const weight = cfg.weight ?? 1.0;
+        for (const [wallet, score] of scores) {
+          result.set(wallet, (result.get(wallet) ?? 0) + score * weight);
+        }
+      } catch (err) {
+        logger.warn({ err, game: cfg.identification }, 'Failed to fetch weighted scores for wallets');
+      }
+    }
+
+    return result;
+  }
 }
 
 function entryFromDoc(doc: Document, rank: number): GameLeaderboardEntryDto {

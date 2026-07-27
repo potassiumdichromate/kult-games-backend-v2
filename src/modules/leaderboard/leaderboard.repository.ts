@@ -101,6 +101,36 @@ export class GameLeaderboardDataRepository {
 
     return { entries, totalCount };
   }
+
+  /** Raw (unweighted) scores for a specific set of wallets, keyed by lowercased wallet address. */
+  async fetchScoresForWallets(
+    cfg: GameLeaderboardConfig,
+    wallets: string[],
+  ): Promise<Map<string, number>> {
+    const lowerWallets = Array.from(new Set(wallets.map((w) => w.toLowerCase())));
+    const map = new Map<string, number>();
+    if (!lowerWallets.length) return map;
+
+    const db = this.getDb(cfg.db);
+    const coll = db.collection<Document>(cfg.collection);
+
+    const docs = await coll
+      .aggregate<Document>([
+        { $project: { player: `$${cfg.personKey}`, score: `$${cfg.scoreKey}` } },
+        { $addFields: { playerLower: { $toLower: '$player' } } },
+        { $match: { playerLower: { $in: lowerWallets } } },
+      ])
+      .toArray();
+
+    for (const doc of docs) {
+      const wallet = String(doc['playerLower'] ?? '');
+      if (!wallet) continue;
+      const score = typeof doc['score'] === 'number' ? doc['score'] : parseFloat(doc['score']) || 0;
+      map.set(wallet, (map.get(wallet) ?? 0) + score);
+    }
+
+    return map;
+  }
 }
 
 function buildLeaderboardPipeline(cfg: GameLeaderboardConfig, skip: number, limit: number): Document[] {
