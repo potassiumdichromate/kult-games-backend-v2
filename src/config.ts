@@ -51,6 +51,7 @@ export const config = {
       tier3: eOpt('ACCESS_CODE_TIER_3_HASH', ''),
       tier4: eOpt('ACCESS_CODE_TIER_4_HASH', ''),
       tier5: eOpt('ACCESS_CODE_TIER_5_HASH', ''),
+      tier6: eOpt('ACCESS_CODE_TIER_6_HASH', ''),
     },
   },
 

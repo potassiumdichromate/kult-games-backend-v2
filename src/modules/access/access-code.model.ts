@@ -7,7 +7,13 @@ export type AccessFeature =
   | 'creator_studio'
   | 'full_browser';
 
-export type AccessTierId = 'tier_1' | 'tier_2' | 'tier_3' | 'tier_4' | 'tier_5';
+export type AccessTierId =
+  | 'tier_1'
+  | 'tier_2'
+  | 'tier_3'
+  | 'tier_4'
+  | 'tier_5'
+  | 'tier_6';
 
 export interface AccessTier {
   tier: AccessTierId;

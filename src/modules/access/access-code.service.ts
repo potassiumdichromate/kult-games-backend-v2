@@ -16,6 +16,11 @@ const ACCESS_TIERS: AccessTier[] = [
   { tier: 'tier_3', label: 'AI Arena + Games + Creator Platform + Moments', features: ['ai_arena', 'games', 'creator_platform', 'moments'] },
   { tier: 'tier_4', label: 'Full Browser', features: ['full_browser', 'ai_arena', 'league', 'moments', 'games', 'creator_platform', 'creator_studio'] },
   { tier: 'tier_5', label: 'Creator Studio', features: ['creator_studio'] },
+  {
+    tier: 'tier_6',
+    label: 'AI Arena + League + Moments + Creator Studio',
+    features: ['ai_arena', 'league', 'moments', 'creator_studio'],
+  },
 ];
 
 type ScryptHash = {
@@ -107,6 +112,7 @@ export class AccessCodeService {
       config.accessCodes.tiers.tier3,
       config.accessCodes.tiers.tier4,
       config.accessCodes.tiers.tier5,
+      config.accessCodes.tiers.tier6,
     ];
 
     for (let i = 0; i < ACCESS_TIERS.length; i += 1) {
