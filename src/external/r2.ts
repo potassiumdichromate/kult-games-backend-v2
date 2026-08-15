@@ -14,6 +14,12 @@ const s3 = new S3Client({
     secretAccessKey: config.r2.secretAccessKey,
   },
   forcePathStyle: true,
+  // From v3.729 the SDK adds a CRC32 checksum to every upload by default. When a PUT is
+  // presigned there is no body yet, so it signs the checksum of an empty one
+  // (`x-amz-checksum-crc32=AAAAAA==`) and R2 rejects the real file the browser sends as a
+  // mismatch. Only compute checksums where the API actually requires them.
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
 });
 
 export function publicUrlForKey(key: string): string {
