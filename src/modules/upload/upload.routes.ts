@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { requireAuth } from '../../middleware/auth';
 import { ok } from '../../core/response';
 import { AppError } from '../../core/error';
-import { generatePresignedUploadUrl, publicUrlForKey } from '../../external/spaces';
+import { generatePresignedUploadUrl } from '../../external/r2';
 import { config } from '../../config';
 
 const ALLOWED_CONTENT_TYPES: Record<string, string> = {
@@ -42,7 +42,7 @@ export function uploadRouter(): Router {
       const ext = ALLOWED_CONTENT_TYPES[ct];
       if (!ext) throw AppError.badRequest(`Unsupported content_type '${contentType}'`);
 
-      const uploadPath = config.spaces.uploadPath.replace(/^\/|\/$/g, '');
+      const uploadPath = config.r2.uploadPath.replace(/^\/|\/$/g, '');
       const walletSegment = safePathSegment(req.player!.walletAddress);
       const key = `${uploadPath}/${walletSegment}/${nanoid()}.${ext}`;
 
@@ -51,10 +51,10 @@ export function uploadRouter(): Router {
       ok(res, {
         upload_url: uploadUrl,
         public_url: publicUrl,
-        // Content-Type must be included in the PUT request so DO Spaces stores
+        // Content-Type must be included in the PUT request so R2 stores
         // the object with the correct MIME type. Without it, objects default to
         // application/octet-stream which causes social platforms to reject images.
-        required_headers: { 'x-amz-acl': 'public-read', 'Content-Type': ct },
+        required_headers: { 'Content-Type': ct },
       });
     } catch (err) {
       next(err);

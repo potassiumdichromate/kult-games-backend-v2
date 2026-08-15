@@ -22,7 +22,7 @@ export function uploadFile(filePath: string): ZgUploadResult {
   const retryInterval = zg.retryInterval!;
 
   const resolvedFile = path.resolve(filePath);
-  const resolvedTmpDir = path.resolve(config.spaces.tmpDir);
+  const resolvedTmpDir = path.resolve(config.r2.tmpDir);
   const relativePath = path.relative(resolvedTmpDir, resolvedFile);
   if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
     throw new Error('0G upload file must be inside the configured temporary directory');

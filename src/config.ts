@@ -113,15 +113,16 @@ export const config = {
     prefix: e('VALKEY_KEY_PREFIX', 'kult_browser'),
   },
 
-  spaces: {
-    key:       e('DO_SPACES_KEY',                   ''),
-    secret:    e('DO_SPACES_SECRET',                ''),
-    endpoint:  e('DO_SPACES_ENDPOINT',              'https://sfo3.digitaloceanspaces.com'),
-    region:    e('DO_SPACES_REGION',                'sfo3'),
-    bucket:    e('MOMENTS_DO_SPACES_BUCKET',        ''),
+  r2: {
+    accessKeyId: e('R2_ACCESS_KEY_ID',              ''),
+    secretAccessKey: e('R2_SECRET_ACCESS_KEY',      ''),
+    endpoint:  e('R2_ENDPOINT',                     ''),
+    region:    e('R2_REGION',                       'auto'),
+    bucket:    e('R2_BUCKET',                       ''),
+    publicUrl: e('R2_PUBLIC_URL',                   '').replace(/\/+$/, ''),
     tmpDir:    e('MOMENTS_DOWNLOAD_TMP_DIR',        '/tmp/moments'),
     maxDownloadBytes: eInt('MOMENTS_MAX_DOWNLOAD_BYTES', 50 * 1024 * 1024),
-    presignTtl: eInt('MOMENTS_DO_SPACES_PRESIGNED_EXPIRATION', 300),
+    presignTtl: eInt('MOMENTS_R2_PRESIGNED_EXPIRATION', 300),
     uploadPath: e('MOMENTS_UPLOAD_PATH', 'moments'),
   },
 

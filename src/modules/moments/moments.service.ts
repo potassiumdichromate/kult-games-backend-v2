@@ -3,7 +3,7 @@ import { AppError } from '../../core/error';
 import { logger } from '../../db/logger';
 import { config } from '../../config';
 import { ValkyQueue } from '../../db/redis';
-import { fileExists } from '../../external/spaces';
+import { fileExists } from '../../external/r2';
 import { MomentsRepository, MomentLikesRepository, DaEventRepository, BookmarksRepository, WatchHistoryRepository, MomentFeedOptions, MomentSortBy, MomentMode, MomentDate } from './moments.repository';
 import { MomentModel, CreateMomentRequest, UpdateMomentRequest, MigrationJob } from './moments.model';
 import type { OnchainActivityService } from '../onchain/onchain.service';

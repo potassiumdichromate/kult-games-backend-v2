@@ -1,4 +1,4 @@
-// Migrates moment assets from DO Spaces to 0G Storage.
+// Migrates moment assets from R2 to 0G Storage.
 // Reliable queue pattern: BRPOPLPUSH → process → LREM (ack)
 
 import * as fs from 'fs';
@@ -9,7 +9,7 @@ import { ValkyQueue } from '../db/redis';
 import { logger } from '../db/logger';
 import { config, QUEUES } from '../config';
 import { uploadFile } from '../external/zg-storage';
-import { assertTrustedSpacesUrl } from '../external/spaces';
+import { assertTrustedR2Url } from '../external/r2';
 import { MomentsRepository } from '../modules/moments/moments.repository';
 import { MigrationJob } from '../modules/moments/moments.model';
 
@@ -85,25 +85,25 @@ export class MigrationWorker implements IWorker {
     if (!/^[A-Za-z0-9_-]{1,64}$/.test(job.momentId)) {
       throw new Error('Invalid moment ID in migration job');
     }
-    assertTrustedSpacesUrl(job.assetUrl);
+    assertTrustedR2Url(job.assetUrl);
     const ext = ASSET_EXTENSIONS[job.assetType.toLowerCase()];
     if (!ext) throw new Error('Unsupported asset type in migration job');
 
     await this.repo.updateByMomentId(job.momentId, { zgStatus: 'migrating' });
 
-    const tmpDir = config.spaces.tmpDir;
+    const tmpDir = config.r2.tmpDir;
     fs.mkdirSync(tmpDir, { recursive: true });
     const tmpFile = path.join(tmpDir, `${job.momentId}${ext}`);
 
     try {
-      // Download from DO Spaces
+      // Download from R2
       const response = await axios.get(job.assetUrl, {
         responseType: 'arraybuffer',
-        maxContentLength: config.spaces.maxDownloadBytes,
-        maxBodyLength: config.spaces.maxDownloadBytes,
+        maxContentLength: config.r2.maxDownloadBytes,
+        maxBodyLength: config.r2.maxDownloadBytes,
         timeout: 60_000,
       });
-      if (response.data.byteLength > config.spaces.maxDownloadBytes) {
+      if (response.data.byteLength > config.r2.maxDownloadBytes) {
         throw new Error('Moment asset exceeds maximum download size');
       }
       fs.writeFileSync(tmpFile, response.data as Buffer);
