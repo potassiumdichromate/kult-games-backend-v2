@@ -9,6 +9,7 @@ import { config, QUEUES } from '../config';
 
 // Repositories
 import { PlayerRepository, NonceRepository } from '../modules/player/player.repository';
+import { ReferralRepository } from '../modules/referral/referral.repository';
 import { AgentRepository } from '../modules/agent/agent.repository';
 import { GameRepository } from '../modules/game/game.repository';
 import { ContentRepository } from '../modules/content/content.repository';
@@ -71,6 +72,7 @@ export class ServiceFactory {
   private playerTitlesRepo()    { return this.singleton('playerTitlesRepo', () => new PlayerTitlesRepository(this.db)); }
   private dailyRewardsRepo()    { return this.singleton('dailyRewardsRepo', () => new DailyRewardsRepository(this.db)); }
   private dailyActivityRepo()   { return this.singleton('dailyActivityRepo', () => new DailyActivityRepository(this.db)); }
+  private referralRepo()        { return this.singleton('referralRepo',    () => new ReferralRepository(this.db)); }
 
   // ── Queues ───────────────────────────────────────────────────────────────────
 
@@ -80,7 +82,6 @@ export class ServiceFactory {
   }
   scrapeQueue()     { return this.singleton('scrapeQueue',     () => new ValkyQueue(this.redis, QUEUES.scrape)); }
   referralClickQ()  { return this.singleton('referralClickQ',  () => new ValkyQueue(this.redis, QUEUES.referralClick)); }
-  referralVerifyQ() { return this.singleton('referralVerifyQ', () => new ValkyQueue(this.redis, QUEUES.referralVerify)); }
 
   // ── Services (factory methods) ────────────────────────────────────────────────
 
@@ -139,7 +140,7 @@ export class ServiceFactory {
 
   createReferralService(): ReferralService {
     return this.singleton('referralService', () =>
-      new ReferralService(this.playerRepo(), this.referralClickQ(), this.referralVerifyQ()),
+      new ReferralService(this.playerRepo(), this.referralRepo(), this.referralClickQ()),
     );
   }
 
@@ -159,7 +160,7 @@ export class ServiceFactory {
         this.agentRepo(),
         this.createKultPointsService(),
         this.dailyActivityRepo(),
-        (playerId, code, ip) => this.createReferralService().processSignup(playerId, code, ip),
+        (referredWallet, code) => this.createReferralService().processSignup(referredWallet, code),
       ),
     );
   }

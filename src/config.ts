@@ -93,6 +93,7 @@ export const config = {
       playerTitles:       e('PLAYER_TITLES_COLL', 'player_titles'),
       dailyRewards:       e('DAILY_REWARDS_COLL', 'daily_rewards'),
       dailyActivity:      e('DAILY_ACTIVITY_COLL', 'daily_activity'),
+      referrals:          e('REFERRALS_COLL', 'store_referrals'),
     },
   },
 
@@ -205,5 +206,4 @@ export const QUEUES = {
   migrationDlq:   qk('moments', 'zero_g',      'migration') + ':dead_letter',
   scrape:         qk('moments', 'bright_data', 'post_scrape'),
   referralClick:  qk('referral', 'click'),
-  referralVerify: qk('referral', 'verification'),
 } as const;

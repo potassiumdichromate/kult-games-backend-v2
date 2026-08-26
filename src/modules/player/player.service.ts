@@ -25,7 +25,7 @@ export class PlayerService {
     private readonly agentRepo: AgentRepository,
     private readonly kultPointsService: KultPointsService,
     private readonly dailyActivityRepo: DailyActivityRepository,
-    private readonly referralQueuePush: ((playerId: string, code: string, ip: string) => Promise<void>) | null,
+    private readonly recordReferralSignup: ((referredWallet: string, code: string) => Promise<void>) | null,
   ) {}
 
   async getNonce(wallet: string): Promise<NonceResponse> {
@@ -66,11 +66,9 @@ export class PlayerService {
     if (isNew) {
       logger.info({ wallet, name }, 'New player registered');
 
-      if (req.referralCode && this.referralQueuePush) {
-        const playerId = player._id?.toHexString() ?? wallet;
+      if (req.referralCode && this.recordReferralSignup) {
         try {
-          await this.referralQueuePush(playerId, req.referralCode, ip);
-          logger.info({ wallet, code: req.referralCode }, 'Referral pushed to validation queue');
+          await this.recordReferralSignup(wallet, req.referralCode);
         } catch (err) {
           logger.error({ err, wallet }, 'Failed to process referral signup');
         }
