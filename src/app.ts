@@ -45,7 +45,15 @@ export function createApp(services: ServiceFactory): express.Application {
   }));
 
   app.use(express.json({ limit: '2mb' }));
-  app.use(pinoHttp({ logger }));
+  app.use(pinoHttp({
+    logger,
+    // Full req/res objects (default) dump every header on every request,
+    // including raw bearer/access tokens — noisy and a plaintext-secret leak in logs.
+    serializers: {
+      req: (req) => ({ method: req.method, url: req.url }),
+      res: (res) => ({ statusCode: res.statusCode }),
+    },
+  }));
   app.use(localization);
 
   // ── SPA-URL social-share handler — MUST be before the legacy-prefix rewriter ──
