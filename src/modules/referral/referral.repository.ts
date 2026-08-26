@@ -9,7 +9,7 @@ export class ReferralRepository extends BaseRepository {
   }
 
   /** One record per referred wallet — repeat signups (shouldn't happen) don't double-count. */
-  async recordSignup(code: string, referrerWallet: string, referredWallet: string): Promise<void> {
+  async recordSignup(code: string, referrerWallet: string | null, referredWallet: string): Promise<void> {
     await this.collection.updateOne(
       { referredWallet },
       { $setOnInsert: { code, referrerWallet, referredWallet, createdAt: new Date() } },

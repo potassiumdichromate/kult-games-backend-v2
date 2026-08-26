@@ -40,19 +40,16 @@ export class ReferralService {
   }
 
   async processSignup(referredWallet: string, code: string): Promise<void> {
-    // Lookup the referrer by code
+    // Codes may belong to a player (their personal link) or be a standalone
+    // campaign tag with no owning player — either way, record the signup.
     const referrer = await this.playerRepo.findByReferralCode(code);
-    if (!referrer) {
-      logger.warn({ code }, 'Referral code not found during signup');
-      return;
-    }
 
-    if (referrer.walletAddress === referredWallet) {
+    if (referrer && referrer.walletAddress === referredWallet) {
       logger.warn({ code, referredWallet }, 'Blocked self-referral');
       return;
     }
 
-    await this.referralRepo.recordSignup(code, referrer.walletAddress, referredWallet);
-    logger.info({ code, referrer: referrer.walletAddress, referredWallet }, 'Referral signup recorded');
+    await this.referralRepo.recordSignup(code, referrer?.walletAddress ?? null, referredWallet);
+    logger.info({ code, referrer: referrer?.walletAddress ?? null, referredWallet }, 'Referral signup recorded');
   }
 }
