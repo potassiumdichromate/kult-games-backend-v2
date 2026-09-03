@@ -24,7 +24,7 @@ interface JwtPayload {
 
 export function signToken(walletAddress: string): string {
   return jwt.sign({ wallet_address: walletAddress, typ: 'kult_player' }, config.auth.jwtSecret, {
-    expiresIn: `${config.auth.jwtExpiryDays}d`,
+    expiresIn: config.auth.jwtExpirySeconds,
     issuer: config.auth.jwtIssuer,
     audience: config.auth.jwtAudience,
   });

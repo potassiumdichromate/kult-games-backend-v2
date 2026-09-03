@@ -22,6 +22,10 @@ const eSecret = (key: string, minLength = 32): string => {
   return value;
 };
 
+// Fixed player session lifetime — intentionally a constant, not env-configurable,
+// so it can't drift per-deployment. Kept in sync with the frontend's own session timer.
+const JWT_EXPIRY_SECONDS = 2 * 24 * 60 * 60; // 2 days
+
 export const config = {
   app: {
     host:        e('HOST',        '0.0.0.0'),
@@ -34,7 +38,7 @@ export const config = {
 
   auth: {
     jwtSecret:       eSecret('JWT_SECRET'),
-    jwtExpiryDays:   eInt('JWT_EXPIRATION_DAYS', 7),
+    jwtExpirySeconds: JWT_EXPIRY_SECONDS,
     jwtIssuer:       e('JWT_ISSUER', 'kult-browser-backend'),
     jwtAudience:     e('JWT_AUDIENCE', 'kult-browser-clients'),
     siweDomain:      e('SIWE_DOMAIN', 'app.kultgames.io'),
