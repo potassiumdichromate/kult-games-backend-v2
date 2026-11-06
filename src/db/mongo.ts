@@ -111,6 +111,10 @@ export async function ensureIndexes(database: Db): Promise<void> {
     createIndexes(database, 'store_referrals', [
       { key: { referred_player_id: 1 }, unique: true },
     ]),
+    createIndexes(database, col.kultWorldReferrals, [
+      { key: { walletAddress: 1 }, unique: true },
+      { key: { code: 1, createdAt: 1 } },
+    ]),
     createIndexes(database, 'store_referral_scores', [
       { key: { walletAddress: 1 }, unique: true },
     ]),

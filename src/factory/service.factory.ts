@@ -33,6 +33,8 @@ import { MarketplaceService } from '../modules/marketplace/marketplace.service';
 import { MomentsService } from '../modules/moments/moments.service';
 import { SocialMediaService } from '../modules/social-media/social-media.service';
 import { ReferralService } from '../modules/referral/referral.service';
+import { KultWorldReferralRepository } from '../modules/kult-world/kult-world.repository';
+import { KultWorldReferralService } from '../modules/kult-world/kult-world.service';
 import { OnchainActivityService } from '../modules/onchain/onchain.service';
 import { AccessCodeService } from '../modules/access/access-code.service';
 import { InternalKultPointsService } from '../modules/internal-kult-points/internal-kult-points.service';
@@ -73,6 +75,7 @@ export class ServiceFactory {
   private dailyRewardsRepo()    { return this.singleton('dailyRewardsRepo', () => new DailyRewardsRepository(this.db)); }
   private dailyActivityRepo()   { return this.singleton('dailyActivityRepo', () => new DailyActivityRepository(this.db)); }
   private referralRepo()        { return this.singleton('referralRepo',    () => new ReferralRepository(this.db)); }
+  private kultWorldReferralRepo() { return this.singleton('kultWorldReferralRepo', () => new KultWorldReferralRepository(this.db)); }
 
   // ── Queues ───────────────────────────────────────────────────────────────────
 
@@ -144,6 +147,12 @@ export class ServiceFactory {
     );
   }
 
+  createKultWorldReferralService(): KultWorldReferralService {
+    return this.singleton('kultWorldReferralService', () =>
+      new KultWorldReferralService(this.kultWorldReferralRepo()),
+    );
+  }
+
   createMarketplaceService(): MarketplaceService {
     return this.singleton('marketplaceService', () =>
       new MarketplaceService(this.listingRepo(), this.orderRepo()),
@@ -161,6 +170,7 @@ export class ServiceFactory {
         this.createKultPointsService(),
         this.dailyActivityRepo(),
         (referredWallet, code) => this.createReferralService().processSignup(referredWallet, code),
+        (referredWallet, code) => this.createKultWorldReferralService().recordSignup(referredWallet, code),
       ),
     );
   }

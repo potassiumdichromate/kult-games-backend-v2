@@ -98,6 +98,7 @@ export const config = {
       dailyRewards:       e('DAILY_REWARDS_COLL', 'daily_rewards'),
       dailyActivity:      e('DAILY_ACTIVITY_COLL', 'daily_activity'),
       referrals:          e('REFERRALS_COLL', 'store_referrals'),
+      kultWorldReferrals: e('KULT_WORLD_REFERRALS_COLL', 'kult_world_referrals'),
     },
   },
 

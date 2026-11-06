@@ -30,6 +30,8 @@ export interface LoginRequest {
   name?: string;
   metadata?: unknown;
   referralCode?: string;
+  /** Kult World campaign link (?referral=). Recorded only for a brand-new player. */
+  kultWorldReferralCode?: string;
 }
 
 export interface LoginResponse {

@@ -18,6 +18,7 @@ import { marketplaceRouter } from './modules/marketplace/marketplace.routes';
 import { momentsRouter } from './modules/moments/moments.routes';
 import { socialMediaRouter } from './modules/social-media/social-media.routes';
 import { referralRouter, referralRedirectRouter } from './modules/referral/referral.routes';
+import { kultWorldRouter } from './modules/kult-world/kult-world.routes';
 import { uploadRouter } from './modules/upload/upload.routes';
 import { adminRouter } from './modules/admin/admin.routes';
 import { shareRouter, createMomentSpaOgHandler } from './modules/share/share.routes';
@@ -74,7 +75,7 @@ export function createApp(services: ServiceFactory): express.Application {
   // ── Backwards-compatibility: rewrite legacy root routes to /api/*
   // Some clients still request endpoints like `/marketplace` or `/games`.
   // Internally rewrite those to `/api/...` so we don't break existing traffic.
-  const legacyPrefixes = ['/marketplace', '/games', '/content', '/leaderboard', '/moments', '/social-media', '/referral', '/upload', '/player', '/admin', '/access-code', '/kp', '/kult-points', '/player-titles', '/rewards'];
+  const legacyPrefixes = ['/marketplace', '/games', '/content', '/leaderboard', '/moments', '/social-media', '/referral', '/kult-world', '/upload', '/player', '/admin', '/access-code', '/kp', '/kult-points', '/player-titles', '/rewards'];
   app.use((req, _res, next) => {
     for (const p of legacyPrefixes) {
       if (req.path === p || req.path.startsWith(p + '/')) {
@@ -110,6 +111,7 @@ export function createApp(services: ServiceFactory): express.Application {
   app.use('/api/moments',      momentsRouter(services.createMomentsService(), services.createCommentsService(), services.getMomentsRepo()));
   app.use('/api/social-media', socialMediaRoutes);
   app.use('/api/referral',     referralRouter(services.createReferralService()));
+  app.use('/api/kult-world',   kultWorldRouter(services.createKultWorldReferralService()));
   app.use('/api/player-titles', playerTitlesRouter(services.createPlayerTitlesService()));
   const dailyRewardsRoutes = dailyRewardsRouter(services.createDailyRewardsService());
   app.use('/api/rewards', dailyRewardsRoutes);

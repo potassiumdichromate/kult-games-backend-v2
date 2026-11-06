@@ -26,6 +26,7 @@ export class PlayerService {
     private readonly kultPointsService: KultPointsService,
     private readonly dailyActivityRepo: DailyActivityRepository,
     private readonly recordReferralSignup: ((referredWallet: string, code: string) => Promise<void>) | null,
+    private readonly recordKultWorldReferral: ((referredWallet: string, code: string) => Promise<void>) | null,
   ) {}
 
   async getNonce(wallet: string): Promise<NonceResponse> {
@@ -71,6 +72,14 @@ export class PlayerService {
           await this.recordReferralSignup(wallet, req.referralCode);
         } catch (err) {
           logger.error({ err, wallet }, 'Failed to process referral signup');
+        }
+      }
+
+      if (req.kultWorldReferralCode && this.recordKultWorldReferral) {
+        try {
+          await this.recordKultWorldReferral(wallet, req.kultWorldReferralCode);
+        } catch (err) {
+          logger.error({ err, wallet }, 'Failed to process Kult World referral signup');
         }
       }
 
