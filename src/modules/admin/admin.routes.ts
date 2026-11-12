@@ -3,10 +3,12 @@ import { requireAuth, requireAdmin } from '../../middleware/auth';
 import { ok } from '../../core/response';
 import { GameLeaderboardConfigRepository } from '../leaderboard/leaderboard.repository';
 import { ListingRepository } from '../marketplace/marketplace.repository';
+import { GameAdminService } from '../game/game-admin.service';
 
 export function adminRouter(
   lbConfigRepo: GameLeaderboardConfigRepository,
   listingRepo: ListingRepository,
+  gameAdmin: GameAdminService,
 ): Router {
   const router = Router();
 
@@ -35,6 +37,25 @@ export function adminRouter(
       }
       await listingRepo.upsert(listing);
       ok(res, { message: 'Listing upserted' });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // GET /api/admin/games — every game's build fields (released or not)
+  router.get('/games', async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      ok(res, await gameAdmin.listBuilds());
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // PUT /api/admin/games/:identification — change a game's build
+  // body: any of { url, playUrl, downloadUrl, isDownloadable, modes }
+  router.put('/games/:identification', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      ok(res, await gameAdmin.updateBuild(req.params['identification']!, req.body, req.player!.walletAddress));
     } catch (err) {
       next(err);
     }

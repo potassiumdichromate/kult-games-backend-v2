@@ -97,8 +97,10 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
   next();
 }
 
+// The dev environment, or a signed-in wallet listed in ADMIN_WALLETS (runs after requireAuth).
 export function requireAdmin(req: Request, _res: Response, next: NextFunction): void {
-  if (!config.app.isAdmin()) {
+  const wallet = req.player?.walletAddress?.toLowerCase();
+  if (!config.app.isAdmin() && !(wallet && config.app.adminWallets.includes(wallet))) {
     return next(AppError.forbidden('Admin access only'));
   }
   next();

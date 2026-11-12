@@ -12,6 +12,7 @@ import { PlayerRepository, NonceRepository } from '../modules/player/player.repo
 import { ReferralRepository } from '../modules/referral/referral.repository';
 import { AgentRepository } from '../modules/agent/agent.repository';
 import { GameRepository } from '../modules/game/game.repository';
+import { GameAdminService } from '../modules/game/game-admin.service';
 import { ContentRepository } from '../modules/content/content.repository';
 import { GlobalLeaderboardRepository, GameLeaderboardConfigRepository } from '../modules/leaderboard/leaderboard.repository';
 import { ListingRepository, OrderRepository } from '../modules/marketplace/marketplace.repository';
@@ -87,6 +88,10 @@ export class ServiceFactory {
   referralClickQ()  { return this.singleton('referralClickQ',  () => new ValkyQueue(this.redis, QUEUES.referralClick)); }
 
   // ── Services (factory methods) ────────────────────────────────────────────────
+
+  createGameAdminService(): GameAdminService {
+    return this.singleton('gameAdminService', () => new GameAdminService(this.gameRepo()));
+  }
 
   createGameService(): GameService {
     return this.singleton('gameService', () => new GameService(this.gameRepo()));

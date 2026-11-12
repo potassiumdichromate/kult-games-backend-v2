@@ -34,6 +34,8 @@ export const config = {
     corsOrigins: eList('CORS_ORIGINS', ['*']),
     environment: e('ENVIRONMENT', 'production'),
     isAdmin():   boolean { return this.environment === 'dev'; },
+    // Wallets allowed into /api/admin in production (comma-separated).
+    adminWallets: eList('ADMIN_WALLETS', []).map((w) => w.toLowerCase()).filter(Boolean),
   },
 
   auth: {

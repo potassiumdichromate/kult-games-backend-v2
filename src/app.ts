@@ -118,7 +118,7 @@ export function createApp(services: ServiceFactory): express.Application {
   // DigitalOcean may strip `/api` before forwarding — keep a direct alias.
   app.use('/rewards', dailyRewardsRoutes);
   app.use('/api/upload',       uploadRouter());
-  app.use('/api/admin',        adminRouter(services.getLbConfigRepo(), services.getListingRepo()));
+  app.use('/api/admin',        adminRouter(services.getLbConfigRepo(), services.getListingRepo(), services.createGameAdminService()));
 
   // Share preview pages — bot-friendly HTML with OG/Twitter Card meta tags.
   // Browsers are redirected to the SPA via inline JS; crawlers read the meta tags.

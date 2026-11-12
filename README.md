@@ -457,12 +457,14 @@ Clients upload the moment asset (image/video) directly to DigitalOcean Spaces us
 presigned URL, then call `POST /api/moments/register` referencing that asset. The backend never
 proxies the binary upload itself.
 
-### Admin — `/api/admin` (🛠️ `requireAdmin` — dev environment only)
+### Admin — `/api/admin` (🛠️ `requireAuth` + `requireAdmin`: a wallet in `ADMIN_WALLETS`, or any signed-in player when `ENVIRONMENT=dev`)
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | PUT | `/api/admin/leaderboard-config` | 🛠️ | Upsert a per-game leaderboard config (identification, weight, source) |
 | PUT | `/api/admin/marketplace/listings` | 🛠️ | Upsert a marketplace listing |
+| GET | `/api/admin/games` | 🛠️ | Every game's build fields, released or not: `url`, play and download overrides, `isDownloadable`, per-mode builds and the last change |
+| PUT | `/api/admin/games/:identification` | 🛠️ | Change a game's build. Body: any of `url`, `playUrl`, `downloadUrl` (`""` clears), `isDownloadable`, `modes` (`[{ id, url, name? }]`, `[]` clears). Links must be `https`. Each change is appended to the game's `buildHistory` with the admin's wallet |
 
 ### Access Code — `/api/access-code`
 
@@ -656,6 +658,7 @@ list with example/default values — copy it to `.env` to get started. Grouped r
 | `APP_NAME` | `kult-browser-backend` | used in `/health` response and `JWT_ISSUER` default |
 | `CORS_ORIGINS` | `*` | comma-separated list of allowed origins |
 | `ENVIRONMENT` | `production` | set to `dev` to unlock `requireAdmin` routes |
+| `ADMIN_WALLETS` | — | comma-separated wallets allowed into `/api/admin/*` in production (the game build editor in Kult World at `/admin/`) |
 
 ### Auth / JWT / SIWE
 | Var | Default | Notes |
@@ -842,11 +845,9 @@ all are worth knowing before you change deployment config or touch the relevant 
    been written. Don't assume DA events are being processed in production just because the
    worker "starts."
 
-3. **`requireAdmin` is an environment gate, not authentication.** Routes behind it
-   (`/api/admin/*`) are reachable by anyone when `ENVIRONMENT=dev`, and unreachable (404, since
-   the middleware just calls `next(AppError.notFound(...))` for non-dev) otherwise. There is no
-   admin login/role system. If admin functionality needs to exist in production, this needs to
-   be designed from scratch.
+3. **Admin access is a wallet allowlist.** Routes under `/api/admin/*` need a signed-in
+   player (SIWE JWT) whose wallet is in `ADMIN_WALLETS`; with `ENVIRONMENT=dev` any signed-in
+   player gets in. Anyone else gets 403. There is no role system beyond that list.
 
 4. **Per-player AI agent wallets store a raw private key in MongoDB** (`ai_models` collection,
    `AgentRepository.createAgentForNewUser()` — `ethers.Wallet.createRandom()`, then
